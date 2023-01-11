@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Main {
+public class MigratoryBirds {
     public static void main(String[] args) {
 
-        System.out.println(migratoryBirds(Arrays.asList(1,2,3,4,5,4,3,2,1,3,4)));
+        System.out.println(migratoryBirds(Arrays.asList(1,2,3,4,5,4,3,2,2,1,5,7,4,3,4)));
 
     }
 
@@ -24,17 +24,15 @@ public class Main {
             }
         }
 
-        for(Integer i : arrMap.values()) {
-            if(i > maxValue) {
-                maxValue = i;
+        for(Map.Entry<Integer, Integer> entry: arrMap.entrySet()) {
+            if(entry.getValue() == maxValue && entry.getKey() < result) {
+                result = entry.getKey();
+            }else if (entry.getValue() > maxValue) {
+                maxValue = entry.getValue();
+                result = entry.getKey();
             }
         }
 
-        for(Map.Entry<Integer, Integer> entrySet : arrMap.entrySet()) {
-            if(entrySet.getValue() == maxValue && entrySet.getKey() < result) {
-                result = entrySet.getKey();
-            }
-        }
         return result;
     }
 }
