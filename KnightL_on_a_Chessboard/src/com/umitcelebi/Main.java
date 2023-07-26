@@ -2,14 +2,17 @@ package com.umitcelebi;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Set;
 
 public class Main {
 
     public static void main(String[] args) {
-        System.out.println(knightlOnAChessboard(7));
+        knightlOnAChessboard(5);
+        knightlOnAChessboard(11);
     }
 
     public static List<List<Integer>> knightlOnAChessboard(int n) {
@@ -17,7 +20,8 @@ public class Main {
         for (int i = 1; i < n; i++) {
             List<Integer> item = new ArrayList<>();
             for (int j = 1; j < n; j++) {
-                item.add(findMinimalQueue(n,new PriorityQueue<>(),i,j,0));
+                Set<Move> set = new HashSet<>();
+                item.add(findMinimalQueue(n,new PriorityQueue<>(),i,j,0,set));
             }
             result.add(item);
         }
@@ -25,100 +29,48 @@ public class Main {
         return result;
     }
 
-    public static int findMinimalQueue2(int n, List<List<Integer>> lastCoordinates, int a, int b, int denemeSayisi) {
+    public static int findMinimalQueue(int n, Queue<List<Move>> queues, int a, int b, int denemeSayisi,Set<Move> set) {
 
         if (denemeSayisi > n * n) return -1;
-        List<List<Integer>> removedCoordinates = new ArrayList<>();
+        Queue<List<Move>> newQueue = new ArrayDeque<>();
 
-        List<List<Integer>> directions = List.of(
-                List.of(a, b),
-                List.of(b, a),
-                List.of(a, -b),
-                List.of(b, -a),
-                List.of(-b, a),
-                List.of(-b, -a),
-                List.of(-a, b),
-                List.of(-a, -b)
-        );
-
-        if (lastCoordinates.isEmpty()) {
-            for (int i = 0; i < 2; i++) {
-                int hareketEdilecekX = directions.get(i).get(0);
-                int hareketEdilecekY = directions.get(i).get(1);
-                if (hareketEdilecekX == n -1 && hareketEdilecekY == n - 1) {
-                    return ++denemeSayisi;
-                }
-                List<Integer> initialCoordinate = List.of(hareketEdilecekX, hareketEdilecekY);
-                lastCoordinates.add(initialCoordinate);
-            }
-        } else {
-
-            int coordinatesSize = lastCoordinates.size();
-            for (int i = 0; i < coordinatesSize; i++) {
-                List<Integer> coordinates = lastCoordinates.get(0);
-                lastCoordinates.remove(0);
-                int lastCoordinateX = coordinates.get(0);
-                int lastCoordinateY = coordinates.get(1);
-                for (int j = 0; j < directions.size(); j++) {
-                    int dirX = directions.get(j).get(0);
-                    int dirY = directions.get(j).get(1);
-                    int newX = lastCoordinateX + dirX;
-                    int newY = lastCoordinateY + dirY;
-                    Move move = new Move(newX, newY);
-                    if (newX < n && newY < n && newX >= 0 && newY >= 0) {
-                        lastCoordinates.add(List.of(newX, newY));
-                    }
-                    if (newX == n-1 && newY == n -1) {
-                        return denemeSayisi;
-                    }
-                }
-            }
-        }
-        return findMinimalQueue2(n,lastCoordinates,a,b,++denemeSayisi);
-    }
-
-
-    public static int findMinimalQueue(int n, Queue<List<List<Integer>>> queues, int a, int b, int denemeSayisi) {
-
-        if (denemeSayisi > n * n) return -1;
-        Queue<List<List<Integer>>> newQueue = new ArrayDeque<>();
-
-        List<List<Integer>> directions = List.of(
-                List.of(a, b),
-                List.of(b, a),
-                List.of(a, -b),
-                List.of(b, -a),
-                List.of(-b, a),
-                List.of(-b, -a),
-                List.of(-a, b),
-                List.of(-a, -b)
+        List<Move> directions = List.of(
+                new Move(a, b),
+                new Move(b, a),
+                new Move(a, -b),
+                new Move(b, -a),
+                new Move(-b, a),
+                new Move(-b, -a),
+                new Move(-a, b),
+                new Move(-a, -b)
         );
 
         if (queues.isEmpty()) {
             for (int i = 0; i < 2; i++) {
-                int hareketEdilecekX = directions.get(i).get(0);
-                int hareketEdilecekY = directions.get(i).get(1);
-                List<List<Integer>> initialCoordinate = List.of(List.of(hareketEdilecekX, hareketEdilecekY));
-                newQueue.add(initialCoordinate);
-                if (hareketEdilecekX == n -1 && hareketEdilecekY == n - 1) {
-                    return initialCoordinate.size();
+                int xStep = directions.get(i).getX();
+                int yStep = directions.get(i).getY();
+                if (xStep == n -1 && yStep == n - 1) {
+                    return 1;
                 }
+
+                newQueue.add(List.of(new Move(xStep, yStep)));
             }
         } else {
             while (!queues.isEmpty()) {
-                List<List<Integer>> coordinates = queues.poll();
-                List<Integer> lastCoordinate = coordinates.get(coordinates.size() - 1);
-                int lastCoordinateX = lastCoordinate.get(0);
-                int lastCoordinateY = lastCoordinate.get(1);
+                List<Move> coordinates = queues.poll();
+                Move lastCoordinate = coordinates.get(coordinates.size() - 1);
+                int lastCoordinateX = lastCoordinate.getX();
+                int lastCoordinateY = lastCoordinate.getY();
                 for (int j = 0; j < directions.size(); j++) {
-                    int dirX = directions.get(j).get(0);
-                    int dirY = directions.get(j).get(1);
+                    int dirX = directions.get(j).getX();
+                    int dirY = directions.get(j).getY();
                     int newX = lastCoordinateX + dirX;
                     int newY = lastCoordinateY + dirY;
-                    List<List<Integer>> newCoordinates = new ArrayList<>(coordinates);
-                    if (newX < n && newY < n && newX >= 0 && newY >= 0 && !coordinates.contains(List.of(newX,newY))) {
-                        newCoordinates.add(List.of(newX, newY));
+                    List<Move> newCoordinates = new ArrayList<>(coordinates);
+                    if (isValid(newX,newY,n) && !set.contains(new Move(newX,newY))) {
+                        newCoordinates.add(new Move(newX,newY));
                         newQueue.add(newCoordinates);
+                        set.add(new Move(newX, newY));
                     }
                     if (newX == n-1 && newY == n -1) {
                         return newCoordinates.size();
@@ -126,6 +78,10 @@ public class Main {
                 }
             }
         }
-        return findMinimalQueue(n,newQueue,a,b,++denemeSayisi);
+        return findMinimalQueue(n,newQueue,a,b,++denemeSayisi, set);
+    }
+
+    public static boolean isValid(int x, int y, int n) {
+        return x < n && y < n && x >= 0 && y >= 0;
     }
 }
